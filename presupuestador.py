@@ -1,42 +1,55 @@
 import streamlit as st
 
-# Tarifas actualizadas según audio de Gustavo
-TARIFA_TRASLADO_KM = 55.0  # Para mudanzas/mercaderías
-TARIFA_EMBARCACION_KM = 80.0 # Para lanchas/cruceros
+# --- CONFIGURACIÓN DE TÍTULOS ---
+st.set_page_config(page_title="Conexión Logística Sur", page_icon="🚛")
 
-st.title("🚛 Conexión Logística Sur")
+# --- TU FIRMA PROFESIONAL ---
+st.sidebar.markdown(f"**Desarrollador:** Leonardo Olivera")
+st.sidebar.caption("Software Developer & Estudiante de Agronomía")
+st.sidebar.caption("IA Avanzada - Agro Data Litoral")
 
-# 1. CAMBIO CLAVE: Primero elegimos la categoría global
-categoria = st.sidebar.selectbox(
-    "Seleccione el rubro:",
-    ["Traslados Generales", "Embarcaciones"]
+# --- TARIFAS (AUDIO GUSTAVO 10/02/2026) ---
+TARIFA_TRASLADOS_KM = 55.0  #
+TARIFA_EMBARCACIONES_KM = 80.0 #
+
+st.markdown("# 🚛 CONEXIÓN LOGÍSTICA SUR")
+
+# --- EL CAMBIO QUE FALTA EN TU APP ---
+# Primero definimos el GRAN RUBRO para que aparezcan las opciones de Gustavo
+rubro = st.selectbox(
+    "Seleccione el rubro del servicio:",
+    ["Traslados Generales (Mudanza/Mercadería)", "Embarcaciones (Lanchas/Cruceros)"]
 )
 
-# 2. Lógica dinámica según la categoría elegida
-if categoria == "Traslados Generales":
-    # Aquí aparecen las opciones que te faltaban
-    tipo_objeto = st.selectbox(
-        "Tipo de traslado:",
-        ["Mudanza Completa", "Mercadería / Pallets", "Objeto Particular"]
+if rubro == "Traslados Generales (Mudanza/Mercadería)":
+    # OPCIONES PARA MUDANZAS
+    tipo_detalle = st.selectbox(
+        "Detalle del objeto:",
+        ["Mudanza", "Mercadería", "Objeto pesado", "Otros"]
     )
-    distancia = st.number_input("Distancia a recorrer (km):", min_value=1)
-    total = distancia * TARIFA_TRASLADO_KM
-    st.info(f"Tarifa aplicada: ${TARIFA_TRASLADO_KM} por kilómetro")
+    distancia = st.number_input("Distancia estimada (km):", min_value=1)
+    # Cálculo a 55 pesos el km según Gustavo
+    costo_final = distancia * TARIFA_TRASLADOS_KM
+    st.info(f"Tarifa aplicada para {tipo_detalle}: **${TARIFA_TRASLADOS_KM} / km**")
 
 else:
-    # Esta es la parte que ya tenías funcionando
-    tipo_lancha = st.selectbox(
+    # OPCIONES PARA EMBARCACIONES (Lo que ya tenías en las capturas)
+    tipo_detalle = st.selectbox(
         "Tamaño de Embarcación:",
-        ["Lancha chica", "Crucero mediano", "Embarcación Grande"]
+        ["Lancha chica", "Crucero mediano", "Embarcación Grande (Hasta 40 pies)"]
     )
-    distancia = st.number_input("Distancia a recorrer (km):", min_value=1)
-    total = distancia * TARIFA_EMBARCACION_KM
-    st.info(f"Tarifa aplicada: ${TARIFA_EMBARCACION_KM} por kilómetro")
+    distancia = st.number_input("Distancia estimada (km):", min_value=1)
+    # Cálculo a 80 y pico según Gustavo
+    costo_final = distancia * TARIFA_EMBARCACIONES_KM
+    st.info(f"Tarifa aplicada para Embarcaciones: **${TARIFA_EMBARCACIONES_KM} / km**")
 
-# 3. Mostrar el resultado final
-st.metric("COSTO ESTIMADO", f"${total:,.2f} UYU")
+# --- RESULTADO FINAL ---
+st.markdown("---")
+st.metric(label="COSTO TOTAL ESTIMADO", value=f"${costo_final:,.2f} UYU")
 
-# Tu firma profesional obligatoria
-st.sidebar.markdown("---")
-st.sidebar.write("**Desarrollador:** Leonardo Olivera")
-st.sidebar.caption("Estudiante de Agronomía | Especialista en IA")
+# --- SUBIDA DE FOTO (Obligatorio como en tu imagen) ---
+st.subheader("📷 Subir foto para verificación de medidas (Obligatorio)")
+st.file_uploader("Drag and drop file here", type=['png', 'jpg', 'jpeg'])
+
+if st.button("📲 ENVIAR A MI WHATSAPP (LEONARDO)"):
+    st.success("Generando cotización...")
