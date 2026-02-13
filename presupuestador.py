@@ -1,42 +1,57 @@
 import streamlit as st
 
-# --- CONFIGURACIÓN DE TARIFAS (AUDIO GUSTAVO 10/02/2026) ---
-# Traslados de mercadería/mudanza: $55/kg
-# Traslados de embarcaciones (Tráiler propio o de la empresa): ~$80/km
-TARIFA_MUDANZA_KG = 55.0
+# --- TARIFAS OFICIALES (ACTUALIZADAS 10/02/2026) ---
+# Gustavo: "Para el cálculo en internet ponele 55 pesos el kilómetro"
+TARIFA_TRASLADO_KM = 55.0  
 TARIFA_EMBARCACION_KM = 80.0 
 
-def calcular_cotizacion(tipo, valor_unidad, distancia=1):
-    if tipo == "Mercadería / Mudanza":
-        return valor_unidad * TARIFA_MUDANZA_KG
-    else:
-        # Para embarcaciones el cálculo suele ser por kilómetro
-        return distancia * TARIFA_EMBARCACION_KM
+st.set_page_config(page_title="Conexión Logística Sur", page_icon="🚛")
 
-# --- INTERFAZ DE CONEXIÓN LOGÍSTICA SUR ---
 st.markdown("<h1 style='text-align: center;'>🚛 CONEXIÓN LOGÍSTICA SUR</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center;'>Actualización de Tarifas v2026.02</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center;'>Cotizador Automático de Traslados</p>", unsafe_allow_html=True)
 
-st.sidebar.header("⚙️ Parámetros de Cotización")
-tipo_servicio = st.sidebar.selectbox("Tipo de Traslado:", ["Mercadería / Mudanza", "Embarcación"])
+# --- PANEL LATERAL ---
+st.sidebar.header("Configuración del Viaje")
+tipo_servicio = st.sidebar.selectbox(
+    "¿Qué desea trasladar?", 
+    ["Mudanza / Mercadería / Objeto", "Embarcación (Lancha/Crucero)"]
+)
 
-if tipo_servicio == "Mercadería / Mudanza":
-    peso = st.sidebar.number_input("Peso total (kg):", min_value=1.0, value=100.0)
-    total = calcular_cotizacion(tipo_servicio, peso)
-    st.info(f"Tarifa aplicada para Mudanza/Mercadería: **${TARIFA_MUDANZA_KG} por kg**")
+distancia = st.sidebar.number_input("Distancia a recorrer (km):", min_value=1.0, value=1.0, step=1.0)
+
+# --- LÓGICA DE CÁLCULO ---
+if tipo_servicio == "Mudanza / Mercadería / Objeto":
+    tarifa_aplicada = TARIFA_TRASLADO_KM
+    descripcion = "Traslado General"
 else:
-    distancia = st.sidebar.number_input("Distancia del trayecto (km):", min_value=1.0, value=10.0)
-    total = calcular_cotizacion(tipo_servicio, 0, distancia)
-    st.info(f"Tarifa aplicada para Embarcaciones: **${TARIFA_EMBARCACION_KM} por km**")
+    tarifa_aplicada = TARIFA_EMBARCACION_KM
+    descripcion = "Traslado de Embarcación"
 
-# --- RESULTADO DEL COTIZADOR ---
+total_cotizacion = distancia * tarifa_aplicada
+
+# --- MOSTRAR RESULTADOS ---
 st.markdown("---")
-c1, c2 = st.columns(2)
-c1.metric("VALOR ESTIMADO", f"${total:,.2f} UYU")
-c2.metric("SERVICIO", tipo_servicio)
+col1, col2 = st.columns(2)
 
-st.success("✅ Cálculo basado en los parámetros de logística regional vigentes.")
+with col1:
+    st.subheader("Resumen del Servicio")
+    st.write(f"**Tipo:** {descripcion}")
+    st.write(f"**Distancia:** {distancia} km")
+    st.write(f"**Tarifa:** ${tarifa_aplicada} por km")
+
+with col2:
+    st.subheader("Costo Total")
+    st.markdown(f"<h2 style='color: #004d40;'>${total_cotizacion:,.2f} UYU</h2>", unsafe_allow_html=True)
+
+# --- SECCIÓN DE FOTO (Como en tu captura de pantalla) ---
+st.markdown("---")
+st.subheader("📷 Registro del Objeto")
+foto = st.file_uploader("Suba una foto del objeto o mercadería para finalizar el presupuesto", type=['png', 'jpg', 'jpeg'])
+
+if st.button("📲 Enviar Cotización por WhatsApp"):
+    # Aquí iría la lógica del enlace de WhatsApp
+    st.success("Preparando mensaje para Leonardo Olivera...")
 
 # --- TU FIRMA PROFESIONAL ---
 st.markdown("---")
-st.caption("Desarrollado por: Leonardo Olivera | Estudiante de Agronomía & Desarrollador IA")
+st.caption("Desarrollado por: Leonardo Olivera | IA & Software Developer")
