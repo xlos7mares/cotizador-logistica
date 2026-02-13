@@ -1,46 +1,66 @@
 import streamlit as st
 
-# --- TARIFAS ACTUALIZADAS SEGÚN AUDIO DE GUSTAVO ---
+# --- CONFIGURACIÓN DE PÁGINA ---
+st.set_page_config(page_title="Conexión Logística Sur", page_icon="🚛")
+
+# --- TARIFAS OFICIALES SEGÚN GUSTAVO ---
 #
-TARIFA_GENERAL_KM = 55.0  # Para mudanzas, mercaderías, objetos
-TARIFA_BARCOS_KM = 80.0    # Para lanchas y cruceros
+PRECIO_MUDANZA_OBJETO_KM = 55.0
+PRECIO_EMBARCACION_KM = 80.0
 
-st.title("🚛 Conexión Logística Sur")
+# --- FIRMA DE LEONARDO OLIVERA ---
+st.sidebar.markdown("### 👨‍💻 Desarrollador")
+st.sidebar.write("**Leonardo Olivera**")
+st.sidebar.caption("Software & IA - Estudiante de Agronomía")
+st.sidebar.caption("Agro Data Litoral")
 
-# 1. ESTO ES LO QUE TE FALTA: Un selector para cambiar el rubro
-rubro = st.radio(
-    "¿Qué tipo de carga desea cotizar?",
-    ["📦 Mercadería / Mudanza / Objeto", "🚤 Embarcación"],
-    horizontal=True
-)
-
+# --- INTERFAZ PRINCIPAL ---
+st.markdown("<h1 style='text-align: center;'>🚛 CONEXIÓN LOGÍSTICA SUR</h1>", unsafe_allow_html=True)
 st.markdown("---")
 
-# 2. Lógica para que aparezcan las opciones correctas
-if rubro == "📦 Mercadería / Mudanza / Objeto":
-    # Aquí es donde aparecen las opciones que no veías
-    tipo_carga = st.selectbox(
-        "Detalle de la carga:",
-        ["Mudanza Residencial", "Mercadería Comercial", "Pallets / Bultos", "Objeto Especial"]
+# CAMBIO PARA QUE APAREZCA SÍ O SÍ: 
+# Usamos un selectbox principal para definir el rubro
+rubro_principal = st.selectbox(
+    "¿Qué servicio desea cotizar hoy?",
+    ["📦 Traslados (Mudanza, Mercadería u Objetos)", "🚤 Embarcaciones (Lanchas, Cruceros)"]
+)
+
+if "📦 Traslados" in rubro_principal:
+    # OPCIONES QUE PIDIÓ GUSTAVO
+    st.subheader("Configuración de Mudanza / Mercadería")
+    opcion_detalle = st.selectbox(
+        "Detalle del objeto de valor:",
+        ["Mudanza Completa", "Mercadería / Bultos", "Objeto de Valor Particular", "Maquinaria Liviana"]
     )
-    distancia = st.number_input("Kilómetros a recorrer (km):", min_value=1.0, step=1.0)
-    total = distancia * TARIFA_GENERAL_KM
-    st.info(f"Aplicando tarifa de Gustavo: **${TARIFA_GENERAL_KM} por km**")
+    
+    distancia = st.number_input("Ingrese los Kilómetros de viaje (km):", min_value=1.0, value=1.0, key="dist_mudanza")
+    
+    # CÁLCULO A 55 PESOS EL KM
+    total = distancia * PRECIO_MUDANZA_OBJETO_KM
+    
+    st.warning(f"Tarifa para Mudanzas/Objetos: ${PRECIO_MUDANZA_OBJETO_KM} por kilómetro")
 
 else:
-    # Esto es lo que te aparece ahora (Lanchas)
-    tipo_lancha = st.selectbox(
+    # OPCIONES DE EMBARCACIONES
+    st.subheader("Configuración de Embarcación")
+    opcion_detalle = st.selectbox(
         "Tipo de embarcación:",
         ["Lancha chica", "Crucero mediano", "Embarcación Grande (Hasta 40 pies / 10 Ton)"]
     )
-    distancia = st.number_input("Kilómetros a recorrer (km):", min_value=1.0, step=1.0)
-    total = distancia * TARIFA_BARCOS_KM
-    st.info(f"Aplicando tarifa de Embarcación: **${TARIFA_BARCOS_KM} por km**")
+    
+    distancia = st.number_input("Ingrese los Kilómetros de viaje (km):", min_value=1.0, value=1.0, key="dist_lancha")
+    
+    # CÁLCULO A 80 PESOS EL KM
+    total = distancia * PRECIO_EMBARCACION_KM
+    
+    st.info(f"Tarifa para Embarcaciones: ${PRECIO_EMBARCACION_KM} por kilómetro")
 
-# 3. Resultado Final Impactante
-st.markdown("### COSTO TOTAL ESTIMADO")
-st.markdown(f"<h1 style='color: #007BFF;'>$ {total:,.2f} UYU</h1>", unsafe_allow_html=True)
+# --- RESULTADO FINAL ---
+st.markdown("---")
+st.markdown(f"### COSTO ESTIMADO PARA: {opcion_detalle}")
+st.markdown(f"<h1 style='color: #2E7D32; text-align: center;'>$ {total:,.2f} UYU</h1>", unsafe_allow_html=True)
 
-# Firma profesional
-st.sidebar.write(f"**Desarrollador:** Leonardo Olivera")
-st.sidebar.caption("Software & IA - Estudiante de Agronomía")
+# --- BOTÓN DE WHATSAPP ---
+if st.button("📲 SOLICITAR ESTE TRASLADO"):
+    st.balloons()
+    st.success("Conectando con el centro de logística...")
