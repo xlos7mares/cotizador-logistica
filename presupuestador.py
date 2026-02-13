@@ -1,50 +1,65 @@
 import streamlit as st
 
-# --- CONFIGURACIÓN CRÍTICA ---
-st.set_page_config(page_title="CLS - Cotizador Oficial", page_icon="🚛")
+# --- TARIFAS OFICIALES (AUDIO GUSTAVO) ---
+PRECIO_MUDANZA_MERCADERIA_KM = 55.0  # El nuevo precio solicitado
+PRECIO_EMBARCACIONES_KM = 80.0       # El precio base de barcos
 
-# --- TARIFAS ACTUALIZADAS (AUDIO GUSTAVO) ---
-TAR_MUDANZA = 55.0  # El precio que pidió Gustavo por km
-TAR_BARCO = 80.0
+st.set_page_config(page_title="CLS - Cotizador", page_icon="🚛")
 
 # --- FIRMA PROFESIONAL ---
-st.sidebar.write("### 👨‍💻 Desarrollador")
-st.sidebar.info("Leonardo Olivera\n\nDesarrollador IA & Software")
+st.sidebar.markdown("### 👨‍💻 Desarrollador")
+st.sidebar.write("**Leonardo Olivera**")
+st.sidebar.caption("Software & IA | Estudiante de Agronomía")
 
 st.markdown("<h1 style='text-align: center;'>🚛 CONEXIÓN LOGÍSTICA SUR</h1>", unsafe_allow_html=True)
 
-# --- FORZAR VISIBILIDAD DE MUDANZAS ---
-# Usamos radio buttons porque son más difíciles de ignorar por la caché
-servicio = st.radio(
-    "ELIJA EL TIPO DE TRASLADO:",
-    ["MUDANZAS / MERCADERÍAS / OBJETOS", "EMBARCACIONES"],
-    index=0  # Esto fuerza a que Mudanza sea lo primero que se ve
+# --- CAMBIO A OPCIONES TIPO CÍRCULO (RADIO BUTTONS) ---
+st.markdown("### Seleccione el rubro del traslado:")
+rubro = st.radio(
+    "Elija una opción:",
+    ["📦 Mudanzas / Mercaderías / Objetos", "🚤 Embarcaciones (Lanchas/Cruceros)"],
+    help="Marque el círculo correspondiente para ver las tarifas específicas."
 )
 
 st.markdown("---")
 
-if servicio == "MUDANZAS / MERCADERÍAS / OBJETOS":
-    st.subheader("📦 Cotización de Carga General")
-    detalle = st.text_input("¿Qué objeto de valor desea trasladar?", "Mudanza / Mercadería")
-    distancia = st.number_input("Kilómetros totales (km):", min_value=1.0, value=1.0)
+# --- LÓGICA POR RUBRO ---
+if rubro == "📦 Mudanzas / Mercaderías / Objetos":
+    st.subheader("Opciones de Carga General")
+    # Aquí anexamos lo que pidió Gustavo
+    tipo_carga = st.selectbox(
+        "Detalle de lo que traslada:",
+        ["Mudanza Particular", "Mercadería Comercial", "Objetos de Valor", "Muebles sueltos"]
+    )
+    distancia = st.number_input("Kilómetros de viaje (km):", min_value=1.0, value=1.0)
     
-    # CÁLCULO EXACTO SOLICITADO
-    total = distancia * TAR_MUDANZA
+    # COSTO EXACTO: 55 por kilómetro
+    total = distancia * PRECIO_MUDANZA_MERCADERIA_KM
     
-    st.success(f"Tarifa Especial: ${TAR_MUDANZA} por kilómetro")
+    st.success(f"Tarifa Especial Gustavo: **${PRECIO_MUDANZA_MERCADERIA_KM} por km**")
 
 else:
-    st.subheader("🚤 Cotización de Embarcaciones")
-    lancha = st.selectbox("Tamaño:", ["Lancha chica", "Crucero mediano", "Embarcación Grande"])
-    distancia = st.number_input("Kilómetros totales (km):", min_value=1.0, value=1.0)
+    st.subheader("Opciones de Náutica")
+    # Aquí se mantienen tus opciones originales de lanchas
+    tipo_lancha = st.selectbox(
+        "Categoría de la embarcación:",
+        ["Lancha chica", "Crucero mediano", "Embarcación Grande (Hasta 40 pies / 10 Ton)"]
+    )
+    distancia = st.number_input("Kilómetros de viaje (km):", min_value=1.0, value=1.0)
     
-    total = distancia * TAR_BARCO
-    st.info(f"Tarifa Embarcación: ${TAR_BARCO} por kilómetro")
+    # COSTO EMBARCACIONES: 80 por kilómetro
+    total = distancia * PRECIO_EMBARCACIONES_KM
+    
+    st.info(f"Tarifa Náutica: **${PRECIO_EMBARCACIONES_KM} por km**")
 
-# --- RESULTADO ---
+# --- MOSTRAR RESULTADO ---
 st.markdown("---")
-st.markdown(f"<h2 style='text-align: center;'>Costo Estimado:</h2>", unsafe_allow_html=True)
-st.markdown(f"<h1 style='text-align: center; color: #1565C0;'>$ {total:,.2f} UYU</h1>", unsafe_allow_html=True)
+st.markdown(f"### COSTO FINAL ESTIMADO ({tipo_carga if 'tipo_carga' in locals() else tipo_lancha})")
+st.markdown(f"<h1 style='color: #1E88E5;'>$ {total:,.2f} UYU</h1>", unsafe_allow_html=True)
 
-if st.button("📲 ENVIAR COTIZACIÓN A GUSTAVO"):
+# Campo de imagen (Obligatorio)
+st.subheader("📷 Foto del objeto/embarcación")
+st.file_uploader("Suba una imagen para validar dimensiones", type=['png', 'jpg', 'jpeg'])
+
+if st.button("📲 ENVIAR COTIZACIÓN"):
     st.balloons()
