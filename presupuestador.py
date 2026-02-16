@@ -7,21 +7,24 @@ st.set_page_config(page_title="CLS - Cotizador Oficial", page_icon="🚛", layou
 TARIFA_MUDANZA_KM = 55.0  
 TARIFA_BARCO_KM = 80.0   
 
-# --- LOGO Y TÍTULO CON ICONOS ---
-# Usamos columnas para que los iconos queden a los lados del nombre
+# --- LOGO Y TÍTULO CON ICONOS GRANDES ---
 st.write("")
-col_logo1, col_logo2, col_logo3 = st.columns([1, 4, 1])
+# Creamos una fila con 3 columnas para distribuir los iconos y el nombre
+col_icono_izq, col_titulo, col_icono_der = st.columns([1, 3, 1])
 
-with col_logo1:
-    st.markdown("<h1 style='text-align: right;'>🚢</h1>", unsafe_allow_html=True) # Icono Barco
+with col_icono_izq:
+    # Iconos de Náutica: Ancla y Lancha grandes
+    st.markdown("<h1 style='text-align: right; font-size: 50px; margin-bottom: 0;'>⚓🚤</h1>", unsafe_allow_html=True)
 
-with col_logo2:
-    st.markdown("<h1 style='text-align: center; color: #01579b; font-family: sans-serif;'>CONEXIÓN LOGÍSTICA SUR</h1>", unsafe_allow_html=True)
+with col_titulo:
+    # Título Central
+    st.markdown("<h1 style='text-align: center; color: #01579b; font-family: sans-serif; font-size: 35px; line-height: 1.2;'>CONEXIÓN LOGÍSTICA SUR</h1>", unsafe_allow_html=True)
 
-with col_logo3:
-    st.markdown("<h1 style='text-align: left;'>🚛</h1>", unsafe_allow_html=True) # Icono Camión
+with col_icono_der:
+    # Icono de Mudanza: Camión grande
+    st.markdown("<h1 style='text-align: left; font-size: 50px; margin-bottom: 0;'>🚛</h1>", unsafe_allow_html=True)
 
-st.markdown("<p style='text-align: center; color: gray;'>Servicios de Transporte Nacional e Internacional</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align: center; color: gray; font-size: 18px;'>Servicios de Transporte Nacional e Internacional</p>", unsafe_allow_html=True)
 st.markdown("---")
 
 # --- SELECCIÓN POR CÍRCULOS (RADIO BUTTONS) ---
@@ -63,11 +66,11 @@ else:
 # --- RESULTADO DEL PRESUPUESTO ---
 st.markdown("---")
 st.markdown(f"<h2 style='text-align: center;'>Presupuesto Estimado:</h2>", unsafe_allow_html=True)
-st.markdown(f"<h1 style='text-align: center; color: #1B5E20;'>$ {total:,.2f} UYU</h1>", unsafe_allow_html=True)
+st.markdown(f"<h1 style='text-align: center; color: #1B5E20; font-size: 45px;'>$ {total:,.2f} UYU</h1>", unsafe_allow_html=True)
 
-# Registro de foto (Visual)
+# Registro de foto
 st.subheader("📷 Registro Fotográfico")
-st.file_uploader("Suba una imagen para validar dimensiones y peso", type=['png', 'jpg', 'jpeg'])
+st.file_uploader("Suba una imagen para validar dimensiones", type=['png', 'jpg', 'jpeg'])
 
 if st.button("📲 SOLICITAR COTIZACIÓN POR WHATSAPP"):
     st.balloons()
@@ -77,4 +80,3 @@ if st.button("📲 SOLICITAR COTIZACIÓN POR WHATSAPP"):
 st.sidebar.markdown("### 👨‍💻 Desarrollador")
 st.sidebar.write("**Leonardo Olivera**")
 st.sidebar.caption("Software & IA | Estudiante de Agronomía")
-st.sidebar.caption("Agro Data Litoral")
