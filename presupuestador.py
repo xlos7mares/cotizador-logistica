@@ -6,11 +6,11 @@ import math
 # --- CONFIGURACIÓN ---
 st.set_page_config(page_title="CLS - Cotizador Oficial", page_icon="🚛", layout="centered")
 
-# --- VALORES DINÁMICOS (Actualizables) ---
+# --- VALORES DINÁMICOS ---
 TARIFA_MUDANZA_KM = 55.0  
 TARIFA_BARCO_KM = 80.0    
-COSTO_TRAILER_PESADO = 200.0  # El extra de 200k que pediste
-COTIZACION_DOLAR_BROU = 40.50 # Puedes cambiar este valor según el día
+COSTO_TRAILER_PESADO = 200.0
+COTIZACION_DOLAR_BROU = 42.50 # Actualizable manualmente
 
 # --- DISEÑO RESPONSIVO ---
 st.markdown(
@@ -30,6 +30,7 @@ st.markdown(
         border-radius: 10px;
         text-align: center;
         border: 2px solid #2e7d32;
+        margin-top: 20px;
     }
     </style>
     <div class="header-container">
@@ -70,11 +71,15 @@ if df is not None:
         l_d = st.selectbox("Ciudad Destino:", sorted(df[df['departamento']==d_d]['localidad'].unique()))
 
     extra_pesada = 0
+    detalle_carga = ""
     if "🚤" in rubro:
         tipo_b = st.selectbox("Tamaño de Embarcación:", ["Lancha chica", "Crucero mediano", "Embarcación Grande (Pesada)"])
+        detalle_carga = tipo_b
         if "Pesada" in tipo_b:
             extra_pesada = COSTO_TRAILER_PESADO
-            st.warning(f"⚠️ Se ha sumado el costo de carga pesada: ${COSTO_TRAILER_PESADO} UYU")
+            st.warning(f"⚠️ Se suma costo de carga pesada: ${COSTO_TRAILER_PESADO} UYU")
+    else:
+        detalle_carga = st.text_input("Detalle de la mercadería:", "Mudanza general")
 
     # Cálculo (Ida y Vuelta + 20% curvas)
     p1 = df[(df['departamento']==d_o) & (df['localidad']==l_o)].iloc[0]
@@ -86,21 +91,30 @@ if df is not None:
     precio_dolares = precio_pesos / COTIZACION_DOLAR_BROU
 
     # --- RESULTADO FINAL ---
-    st.markdown("---")
     st.markdown(f"""
         <div class="price-box">
             <h3 style="margin:0; color:#2e7d32;">PRESUPUESTO ESTIMADO</h3>
-            <h1 style="margin:0; font-size: 45px; color:#1b5e20;">$ {precio_pesos:,.2f} UYU</h1>
+            <h1 style="margin:0; font-size: 42px; color:#1b5e20;">$ {precio_pesos:,.2f} UYU</h1>
             <p style="font-size: 20px; color:#555;">Equivale a: <b>U$S {precio_dolares:,.2f}</b></p>
-            <small>Cotización BROU aplicada: ${COTIZACION_DOLAR_BROU} | Distancia: {round(dist_total,1)} km (Ida y Vuelta)</small>
+            <small>Dólar BROU: ${COTIZACION_DOLAR_BROU} | Distancia Total: {round(dist_total,1)} km</small>
         </div>
     """, unsafe_allow_html=True)
 
+    st.markdown("---")
+    # --- SUBIDA DE IMAGEN ---
+    st.subheader("📷 Foto de lo que desea trasladar")
+    foto = st.file_uploader("Suba una imagen para validar dimensiones (Obligatorio)", type=['png', 'jpg', 'jpeg'])
+
+    # --- BOTÓN DE ENVÍO ---
+    if st.button("📲 SOLICITAR COTIZACIÓN"):
+        if foto is not None:
+            st.balloons()
+            st.success(f"¡Presupuesto generado! Por favor, envíe el detalle a: conexionlogisticasur@gmail.com")
+            # Aquí podrías agregar un mailto link si lo deseas
+        else:
+            st.error("Por favor, sube una foto antes de solicitar la cotización.")
+
 else:
     st.error("Error al cargar localidades.")
-
-# Botón WhatsApp
-if st.button("📲 SOLICITAR COTIZACIÓN"):
-    st.balloons()
 
 st.sidebar.markdown(f"**Desarrollador:** Leonardo Olivera")
