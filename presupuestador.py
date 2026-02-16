@@ -1,63 +1,72 @@
 import streamlit as st
 
-# --- CONFIGURACIÓN DE PÁGINA ---
-st.set_page_config(page_title="CLS - Presupuestador Oficial", page_icon="🚛")
+# --- CONFIGURACIÓN PROFESIONAL ---
+st.set_page_config(page_title="CLS - Cotizador Oficial", page_icon="🚛", layout="wide")
 
-# --- TARIFAS ACTUALIZADAS SEGÚN GUSTAVO ---
-#
-TARIFA_MUDANZA_KM = 55.0  
-TARIFA_BARCO_KM = 80.0   
+# --- TARIFAS ACTUALIZADAS (AUDIO GUSTAVO 10/02) ---
+TARIFA_MUDANZA_KM = 55.0  # 
+TARIFA_BARCO_KM = 80.0    # 
 
 # --- TU FIRMA PROFESIONAL ---
 st.sidebar.markdown("### 👨‍💻 Desarrollador")
 st.sidebar.write("**Leonardo Olivera**")
 st.sidebar.caption("Software & IA | Estudiante de Agronomía")
+st.sidebar.markdown("---")
 
-st.markdown("<h1 style='text-align: center; color: #01579b;'>🚛 CONEXIÓN LOGÍSTICA SUR</h1>", unsafe_allow_html=True)
-st.markdown("---")
-
-# --- SELECCIÓN POR CÍRCULOS (RADIO) ---
-st.markdown("### 1. ¿Qué tipo de traslado necesita cotizar?")
-rubro = st.radio(
-    "Seleccione una categoría:",
-    ["📦 Mudanzas, Mercaderías u Objetos", "🚤 Embarcaciones (Lanchas/Cruceros)"],
-    index=0,
-    horizontal=True
+# --- SELECTOR DE RUBRO (FORZA LA ACTUALIZACIÓN) ---
+st.sidebar.header("Configuración del Servicio")
+rubro = st.sidebar.radio(
+    "Seleccione el rubro:",
+    ["📦 Mudanzas / Mercaderías / Objetos", "🚤 Embarcaciones"],
+    index=0
 )
 
+st.markdown("<h1 style='text-align: center; color: #004d40;'>🚛 CONEXIÓN LOGÍSTICA SUR</h1>", unsafe_allow_html=True)
 st.markdown("---")
 
 if "📦 Mudanzas" in rubro:
-    st.subheader("Configuración de Carga General")
-    tipo_detalle = st.selectbox(
-        "Detalle del objeto:",
-        ["Mudanza", "Mercadería", "Objetos de Valor", "Maquinaria Liviana"]
-    )
-    distancia = st.number_input("Kilómetros totales (km):", min_value=1.0, value=1.0, key="km_muda")
+    st.header("Cotizador de Carga General")
+    st.info(f"Tarifa vigente para traslados: **${TARIFA_MUDANZA_KM} por kilómetro**") # 
     
-    # CÁLCULO A 55 PESOS EL KM
+    tipo_objeto = st.selectbox(
+        "¿Qué desea trasladar?",
+        ["Mudanza Particular", "Mercadería / Bultos", "Objeto de Valor", "Maquinaria Liviana"]
+    )
+    distancia = st.number_input("Kilómetros totales de ruta (km):", min_value=1.0, value=1.0, step=1.0)
+    
+    # CÁLCULO A 55 PESOS EL KM 
     total = distancia * TARIFA_MUDANZA_KM
-    st.success(f"Tarifa autorizada: **${TARIFA_MUDANZA_KM} por km**")
 
 else:
-    st.subheader("Configuración de Náutica")
-    tipo_detalle = st.selectbox(
-        "Categoría de embarcación:",
-        ["Lancha chica", "Crucero mediano", "Embarcación Grande (Hasta 40 pies)"]
-    )
-    distancia = st.number_input("Kilómetros totales (km):", min_value=1.0, value=1.0, key="km_lancha")
+    st.header("Cotizador de Náutica")
+    st.info(f"Tarifa vigente para embarcaciones: **${TARIFA_BARCO_KM} por kilómetro**") # 
     
+    tipo_lancha = st.selectbox(
+        "Categoría de la embarcación:",
+        ["Lancha chica", "Crucero mediano", "Embarcación Grande (Hasta 40 pies / 10 Ton)"]
+    )
+    distancia = st.number_input("Kilómetros totales de ruta (km):", min_value=1.0, value=1.0, step=1.0)
+    
+    # CÁLCULO A 80 PESOS EL KM 
     total = distancia * TARIFA_BARCO_KM
-    st.info(f"Tarifa Náutica: **${TARIFA_BARCO_KM} por km**")
 
-# --- RESULTADO FINAL ---
+# --- RESULTADO DE IMPACTO ---
 st.markdown("---")
-st.markdown(f"<h2 style='text-align: center;'>Presupuesto Estimado:</h2>", unsafe_allow_html=True)
-st.markdown(f"<h1 style='text-align: center; color: #1B5E20;'>$ {total:,.2f} UYU</h1>", unsafe_allow_html=True)
+col1, col2 = st.columns(2)
+with col1:
+    st.subheader("Resumen de Cotización")
+    st.write(f"**Servicio:** {rubro}")
+    st.write(f"**Distancia:** {distancia} km")
 
-# Registro de foto
-st.subheader("📷 Foto del objeto")
-st.file_uploader("Suba una imagen para validar dimensiones", type=['png', 'jpg', 'jpeg'])
+with col2:
+    st.markdown(f"<h2 style='text-align: center;'>COSTO TOTAL</h2>", unsafe_allow_html=True)
+    st.markdown(f"<h1 style='text-align: center; color: #1B5E20;'>$ {total:,.2f} UYU</h1>", unsafe_allow_html=True)
 
-if st.button("📲 SOLICITAR POR WHATSAPP"):
+# --- REGISTRO FOTOGRÁFICO ---
+st.markdown("---")
+st.subheader("📷 Subir foto para verificación de medidas (Obligatorio)")
+st.file_uploader("Drag and drop file here", type=['png', 'jpg', 'jpeg'])
+
+if st.button("📲 ENVIAR PRESUPUESTO A WHATSAPP"):
     st.balloons()
+    st.success("Enviando datos a Leonardo Olivera...")
