@@ -10,46 +10,52 @@ st.set_page_config(page_title="CLS - Cotizador Oficial", page_icon="🚛", layou
 TARIFA_MUDANZA_KM = 55.0  
 TARIFA_BARCO_KM = 80.0   
 
-# --- FUNCIONES TÉCNICAS (PROCESAMIENTO DE DATOS) ---
-@st.cache_data
-def cargar_datos():
-    # Cargamos el archivo que subiste
-    df = pd.read_csv('localidades-29-7nm (1).csv')
-    
-    def get_centroid(wkt):
-        # Extraemos coordenadas X e Y del formato MULTIPOLYGON
-        coords = re.findall(r"[-+]?\d*\.\d+|\d+", wkt)
-        coords = [float(c) for c in coords]
-        xs = coords[0::2]
-        ys = coords[1::2]
-        if xs and ys:
-            return sum(xs)/len(xs), sum(ys)/len(ys)
-        return 0, 0
-
-    # Calculamos el punto central de cada localidad para medir distancias
-    df['centroid_x'], df['centroid_y'] = zip(*df['wkt'].apply(get_centroid))
-    return df
-
-try:
-    df_localidades = cargar_datos()
-except:
-    st.error("Error: No se encontró el archivo 'localidades-29-7nm (1).csv'. Asegúrate de subirlo a GitHub.")
-    st.stop()
-
-# --- LOGO PERSONALIZADO (ANCLA ARRIBA, BARCO IZQ, CAMIÓN DER) ---
+# --- LOGO RESPONSIVO (SE ADAPTA A CELULAR Y PC) ---
 st.markdown(
     """
-    <div style="text-align: center; line-height: 1;">
-        <div style="font-size: 70px; margin-bottom: 10px;">⚓</div>
-        <div style="display: flex; align-items: center; justify-content: center; gap: 20px;">
-            <span style="font-size: 60px;">🚤</span>
-            <h1 style="color: #01579b; font-family: sans-serif; font-size: 42px; margin: 0;">
-                CONEXIÓN LOGÍSTICA SUR
-            </h1>
-            <span style="font-size: 60px;">🚛</span>
+    <style>
+    .main-title-container {
+        text-align: center;
+        padding: 10px;
+    }
+    .anchor-icon {
+        font-size: 50px;
+        margin-bottom: -10px;
+    }
+    .flex-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        flex-wrap: nowrap; /* Evita que se parta en dos líneas */
+    }
+    .side-icon {
+        font-size: 40px;
+    }
+    .main-text {
+        color: #01579b;
+        font-family: 'sans-serif';
+        font-weight: bold;
+        /* El truco mágico: vw significa 'viewport width'. Se adapta al ancho de la pantalla */
+        font-size: clamp(18px, 5vw, 40px); 
+        margin: 0;
+        white-space: nowrap; /* Fuerza a que se mantenga en una sola línea */
+    }
+    @media (max-width: 480px) {
+        .anchor-icon { font-size: 40px; }
+        .side-icon { font-size: 30px; }
+    }
+    </style>
+    
+    <div class="main-title-container">
+        <div class="anchor-icon">⚓</div>
+        <div class="flex-container">
+            <span class="side-icon">🚤</span>
+            <h1 class="main-text">CONEXIÓN LOGÍSTICA SUR</h1>
+            <span class="side-icon">🚛</span>
         </div>
-        <p style="color: gray; font-size: 20px; margin-top: 15px;">
-            Servicios de Transporte Nacional e Internacional
+        <p style="color: gray; font-size: clamp(14px, 2vw, 18px); margin-top: 5px;">
+            Transporte Nacional e Internacional
         </p>
     </div>
     """,
@@ -57,68 +63,50 @@ st.markdown(
 )
 st.markdown("---")
 
-# --- 1. SELECCIÓN DE RUBRO ---
-rubro = st.radio(
-    "### 🛠️ ¿Qué tipo de traslado necesita?",
-    ["📦 Mudanzas, Mercaderías u Objetos", "🚤 Embarcaciones (Lanchas/Cruceros)"],
-    index=0,
-    horizontal=True
-)
+# --- CARGA DE DATOS (Mismo código anterior) ---
+@st.cache_data
+def cargar_datos():
+    try:
+        df = pd.read_csv('localidades-29-7nm (1).csv')
+        def get_centroid(wkt):
+            coords = re.findall(r"[-+]?\d*\.\d+|\d+", wkt)
+            coords = [float(c) for c in coords]
+            xs, ys = coords[0::2], coords[1::2]
+            return (sum(xs)/len(xs), sum(ys)/len(ys)) if xs else (0,0)
+        df['centroid_x'], df['centroid_y'] = zip(*df['wkt'].apply(get_centroid))
+        return df
+    except:
+        return None
 
-st.markdown("---")
+df_localidades = cargar_datos()
 
-# --- 2. SELECTOR DE ORIGEN Y DESTINO ---
-col1, col2 = st.columns(2)
+if df_localidades is not None:
+    # --- SELECCIÓN DE RUBRO ---
+    rubro = st.radio("### 🛠️ ¿Qué tipo de traslado necesita?", 
+                     ["📦 Mudanzas, Mercaderías u Objetos", "🚤 Embarcaciones"], 
+                     horizontal=True)
 
-with col1:
-    st.markdown("### 📍 Origen")
-    depto_origen = st.selectbox("Departamento de salida:", sorted(df_localidades['departamento'].unique()))
-    locs_origen = df_localidades[df_localidades['departamento'] == depto_origen]
-    loc_origen = st.selectbox("Ciudad/Localidad de salida:", sorted(locs_origen['localidad'].unique()))
+    # --- SELECTORES ORIGEN/DESTINO ---
+    col1, col2 = st.columns(2)
+    with col1:
+        depto_origen = st.selectbox("Dpto. Origen:", sorted(df_localidades['departamento'].unique()))
+        loc_origen = st.selectbox("Ciudad Origen:", sorted(df_localidades[df_localidades['departamento'] == depto_origen]['localidad'].unique()))
+    with col2:
+        depto_destino = st.selectbox("Dpto. Destino:", sorted(df_localidades['departamento'].unique()))
+        loc_destino = st.selectbox("Ciudad Destino:", sorted(df_localidades[df_localidades['departamento'] == depto_destino]['localidad'].unique()))
 
-with col2:
-    st.markdown("### 🏁 Destino")
-    depto_destino = st.selectbox("Departamento de llegada:", sorted(df_localidades['departamento'].unique()))
-    locs_destino = df_localidades[df_localidades['departamento'] == depto_destino]
-    loc_destino = st.selectbox("Ciudad/Localidad de llegada:", sorted(locs_destino['localidad'].unique()))
+    # --- CÁLCULO ---
+    p_a = df_localidades[(df_localidades['departamento'] == depto_origen) & (df_localidades['localidad'] == loc_origen)].iloc[0]
+    p_b = df_localidades[(df_localidades['departamento'] == depto_destino) & (df_localidades['localidad'] == loc_destino)].iloc[0]
+    dist_km = (math.sqrt((p_b['centroid_x'] - p_a['centroid_x'])**2 + (p_b['centroid_y'] - p_a['centroid_y'])**2) / 1000) * 1.2
+    
+    precio = dist_km * (TARIFA_MUDANZA_KM if "📦" in rubro else TARIFA_BARCO_KM)
 
-# --- 3. CÁLCULO DE DISTANCIA ---
-# Obtenemos las coordenadas de las localidades elegidas
-punto_a = df_localidades[(df_localidades['departamento'] == depto_origen) & (df_localidades['localidad'] == loc_origen)].iloc[0]
-punto_b = df_localidades[(df_localidades['departamento'] == depto_destino) & (df_localidades['localidad'] == loc_destino)].iloc[0]
-
-# Cálculo de distancia euclidiana (UTM a Kilómetros)
-distancia_m = math.sqrt((punto_b['centroid_x'] - punto_a['centroid_x'])**2 + (punto_b['centroid_y'] - punto_a['centroid_y'])**2)
-distancia_km = round(distancia_m / 1000, 1)
-
-# Ajuste por curvas en carretera (se suele sumar un 15-20% a la distancia lineal)
-distancia_final = round(distancia_km * 1.2, 1)
-
-st.info(f"📏 Distancia estimada de ruta: **{distancia_final} km**")
-
-# --- 4. CÁLCULO DE COSTO ---
-if "📦 Mudanzas" in rubro:
-    total = distancia_final * TARIFA_MUDANZA_KM
-    tarifa_actual = TARIFA_MUDANZA_KM
+    st.info(f"📏 Distancia: **{round(dist_km, 1)} km**")
+    st.markdown(f"<h1 style='text-align: center; color: #1B5E20;'>$ {precio:,.2f} UYU</h1>", unsafe_allow_html=True)
 else:
-    total = distancia_final * TARIFA_BARCO_KM
-    tarifa_actual = TARIFA_BARCO_KM
+    st.error("Por favor sube el archivo CSV a GitHub.")
 
-# --- RESULTADO FINAL ---
-st.markdown("---")
-st.markdown(f"<h2 style='text-align: center;'>Presupuesto Estimado:</h2>", unsafe_allow_html=True)
-st.markdown(f"<h1 style='text-align: center; color: #1B5E20; font-size: 55px;'>$ {total:,.2f} UYU</h1>", unsafe_allow_html=True)
-st.caption(f"Calculado a una tarifa de ${tarifa_actual} por km.")
-
-# Registro de foto
-st.subheader("📷 Registro Fotográfico")
-st.file_uploader("Suba una imagen para validar dimensiones", type=['png', 'jpg', 'jpeg'])
-
-if st.button("📲 SOLICITAR COTIZACIÓN POR WHATSAPP"):
+# --- BOTÓN WHATSAPP ---
+if st.button("📲 SOLICITAR COTIZACIÓN"):
     st.balloons()
-    st.success("Enviando ruta y presupuesto a Leonardo Olivera...")
-
-# --- FIRMA ---
-st.sidebar.markdown("### 👨‍💻 Desarrollador")
-st.sidebar.write("**Leonardo Olivera**")
-st.sidebar.caption("Software & IA | Estudiante de Agronomía")
